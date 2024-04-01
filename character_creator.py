@@ -21,28 +21,36 @@ manualSelect = False
 import os
 import sys
 
+os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
+
 try:
   import kivy
 except ModuleNotFoundError:
   logFile.write("Kivy not found. Installing with Pip.\n")
   os.system("pip3 install kivy")
   import kivy
-from kivy.app import App
+from kivymd.app import MDApp
 from kivy.uix.widget import Widget
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
-from kivy.base import runTouchApp
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 
 import json
-import urllib
+import urllib.request
 import zipfile
+import pypdf
 
 SrcHeaderList = ["Ability-Scores", "Alignments", "Backgrounds", "Classes", "Conditions", "Damage-Types", "Equipment", "Feats", "Features", "Languages", "Magic-Items", "Magic-Schools", "Monsters", "Proficiencies", "Races", "Rule-Sections", "Rules", "Skills", "Spells", "Subclasses", "Subraces", "Traits", "Weapon-Properties"]
 srcData = {}
 
-if False in [os.path.isfile(f"5e-database-3.3.3/src/{itemType}.json") for itemType in SrcHeaderList]: #Switched to if statement as the file not existing is the only possible issue
+if False in [os.path.isfile(f"./5e-database-3.3.3/src/{itemType}.json") for itemType in SrcHeaderList]: #Switched to if statement as the file not existing is the only possible issue
   logFile.write("Some database files were missing. Attempting to reinstall directory from \"https://github.com/5e-bits/5e-database/archive/refs/tags/v3.3.3.zip\". ")
-  if not os.path.isfile("5e-database-3.3.3.zip"):
+  if not os.path.isfile("./5e-database-3.3.3.zip"):
     try:
       urllib.request.urlretrieve("https://github.com/5e-bits/5e-database/archive/refs/tags/v3.3.3.zip","5e-database-3.3.3.zip")
     except Exception as e:
@@ -51,11 +59,11 @@ if False in [os.path.isfile(f"5e-database-3.3.3/src/{itemType}.json") for itemTy
   else:
     logFile.write("Zip file already exists, will use that instead of installing. ")
   logFile.write("Unzipping.\n")
-  zipfile.ZipFile("5e-database-3.3.3.zip","r").extractall()
+  zipfile.ZipFile("./5e-database-3.3.3.zip","r").extractall()
 
 for fileName in SrcHeaderList: #Copied loading here instead
   try:
-    baseData = json.load(open(f"5e-database-3.3.3/src/5e-SRD-{fileName}.json", "r"))
+    baseData = json.load(open(f"./5e-database-3.3.3/src/5e-SRD-{fileName}.json", "r"))
   except MemoryError:
     logFile.write("Out of memory. Quitting to not crash entire computer.\n")
     sys.exit()
@@ -66,70 +74,91 @@ for fileName in SrcHeaderList: #Copied loading here instead
   srcData[fileName] = baseDataDict
 del baseData, baseDataDict
 
-envWidget = Widget()
-testdropdown = DropDown()
-fileButton = Button(text="File",size_hint_y=None,height=10)
+#____________________________________________________________________________________________________________________________________________
 
-for i in range(10):
-  btn = Button(text="Value %d" % i,size_hint_y=None,height=44)
-  btn.bind(on_release=lambda btn: testdropdown.select(btn.text))
-  testdropdown.add_widget(btn)
+def save(data = {}):
+  pass
 
-mainbutton= Button(text="Hello",size_hint=(None,None))
-mainbutton.bind(on_release=testdropdown.open)
-testdropdown.bind(on_select=lambda instance,x:setattr(mainbutton,"text",x))
-runTouchApp(envWidget)
+toolBarHeight = 30
 
-"""
-def makeCustomContentJson(JsonPath = "",data = None) -> None:
-  if data == None:
-    raise ValueError("No Data was given.")
-  customJsonFile = open(JsonPath,"w")
-  match data[category]:
-    case "Ability-Scores":
-      pass
-    case "Alignments":
-      pass
-    case "Backgrounds":
-      pass
-    case "Classes":
-      pass
-    case "Conditions":
-      pass
-    case "Damage-Types":
-      pass
-    case "Equipment":
-      pass
-    case "Feats":
-      pass
-    case "Features":
-      pass
-    case "Languages":
-      pass
-    case "Magic-Items":
-      pass
-    case "Magic-Schools":
-      pass
-    case "Monsters":
-      pass
-    case "Races":
-      pass
-    case "Rule-Sections":
-      pass
-    case "Rules":
-      pass
-    case "Skills":
-      pass
-    case "Spells":
-      pass
-    case "Subclasses":
-      pass
-    case "Subraces":
-      pass
-    case "Traits":
-      pass
-    case "Weapon-Properties":
-"""
+class CharacterCreator(MDApp):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+  def build(self):
+    envWidget = BoxLayout(orientation = "vertical")
+    mainWindTB = ToolBar(toolBarButtons = {
+  "File":{
+    "New":{"TestButton":Button()},
+    "Open":{"TestButton":Button()},
+    "Save":Button(on_select = save),
+    "Save As":Button()
+  },"Edit":{
+    "TestButton":Button()
+  },"TestButton":Button()
+})
+    envWidget.add_widget(mainWindTB)
+    basePages = [Page(pageName = "Name + Stats"),Page(pageName= "Test"), Page()]
+    Pages = BoxLayout(orientation = "vertical",size_hint = (1, None))
+    PagesScroll = ScrollView(do_scroll_x = False, bar_pos_y = "right", scroll_type = ["bars"])
+    PagesScroll.y = 0
+    for page in basePages:
+      Pages.add_widget(page)
+    PagesScroll.add_widget(Pages)
+    envWidget.add_widget(PagesScroll)
+    return envWidget
+
+class Page(BoxLayout):
+  def __init__(self, pageName = None, **kwargs):
+    super().__init__(**kwargs)
+    self.size_hint = None, None
+    self.size = 1000,282
+    self.add_widget(Button(size_hint = (1,1)))
+    self.pageName = pageName
+  
+
+class ToolBar(BoxLayout):
+  def __init__(self, toolBarButtons={},**kwargs):
+    self.toolBarButtons = toolBarButtons
+    self.orientation = "horizontal"
+    self.height = toolBarHeight
+    self.size_hint_y = None
+    super().__init__(**kwargs)
+    
+    for btn in toolBarButtons.keys():
+      match toolBarButtons[btn]:
+        
+        case dict():
+          dropButton = Button(text = btn,height = toolBarHeight,size_hint_y = None, size_hint_x = None)
+          buttonDrop = DropDown()
+          self.add_widget(dropButton)
+          for chldBtn in toolBarButtons[btn].keys():
+            match toolBarButtons[btn][chldBtn]:
+              
+              case dict():
+                horizButton = Button(text = chldBtn, height = toolBarHeight, size_hint_y = None, size_hint_x = None)
+                horizDrop = DropDown()
+                buttonDrop.add_widget(horizButton)
+                for horizChldBtn in toolBarButtons[btn][chldBtn].keys():
+                  toolBarButtons[btn][chldBtn][horizChldBtn].height = toolBarHeight; toolBarButtons[btn][chldBtn][horizChldBtn].size_hint_y = None
+                  toolBarButtons[btn][chldBtn][horizChldBtn].text = horizChldBtn
+                  horizDrop.add_widget(toolBarButtons[btn][chldBtn][horizChldBtn])
+                horizButton.bind(on_release = horizDrop.open)
+              
+              case Button():
+                toolBarButtons[btn][chldBtn].height = toolBarHeight; toolBarButtons[btn][chldBtn].size_hint_y = None
+                toolBarButtons[btn][chldBtn].text = chldBtn
+                buttonDrop.add_widget(toolBarButtons[btn][chldBtn])
+          dropButton.bind(on_release = buttonDrop.open)
+       
+        case Button():
+          toolBarButtons[btn].text = btn
+          toolBarButtons[btn].size_hint_y = None; toolBarButtons[btn].height = toolBarHeight
+          toolBarButtons[btn].size_hint_x = None
+          self.add_widget(toolBarButtons[btn])
+
+CharacterCreator().run()
+
+
 #Use this code whenever accessing json data in case some of it goes missing or a file is deleted accidentally.
 """
 try:
