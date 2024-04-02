@@ -39,6 +39,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.graphics import *
 
 import json
 import urllib.request
@@ -69,7 +70,7 @@ for fileName in SrcHeaderList: #Copied loading here instead
     sys.exit()
   baseDataDict = {}
   for item in baseData:
-    item["sourcebook"]="phb"
+    item["sourcebook"] = "phb"
     baseDataDict[item["index"]] = item
   srcData[fileName] = baseDataDict
 del baseData, baseDataDict
@@ -86,6 +87,8 @@ class CharacterCreator(MDApp):
     super().__init__(**kwargs)
   def build(self):
     envWidget = BoxLayout(orientation = "vertical")
+    with envWidget.canvas:
+      Color(1.,0,0)
     mainWindTB = ToolBar(toolBarButtons = {
   "File":{
     "New":{"TestButton":Button()},
@@ -97,10 +100,10 @@ class CharacterCreator(MDApp):
   },"TestButton":Button()
 })
     envWidget.add_widget(mainWindTB)
-    basePages = [Page(pageName = "Name + Stats"),Page(pageName= "Test"), Page()]
-    Pages = BoxLayout(orientation = "vertical",size_hint = (1, None))
-    PagesScroll = ScrollView(do_scroll_x = False, bar_pos_y = "right", scroll_type = ["bars"])
-    PagesScroll.y = 0
+    basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), Page()]
+    Pages = GridLayout(cols = 1, spacing = 10, size_hint = (1, None))
+    Pages.bind(minimum_height = Pages.setter( "height"))
+    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"])
     for page in basePages:
       Pages.add_widget(page)
     PagesScroll.add_widget(Pages)
@@ -122,6 +125,7 @@ class ToolBar(BoxLayout):
     self.orientation = "horizontal"
     self.height = toolBarHeight
     self.size_hint_y = None
+    self.pos_hint = {"top":1}
     super().__init__(**kwargs)
     
     for btn in toolBarButtons.keys():
