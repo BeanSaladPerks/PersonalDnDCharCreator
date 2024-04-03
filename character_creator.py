@@ -40,6 +40,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.graphics import *
+from kivy.graphics import Rectangle
+from kivy.graphics import Canvas
 
 import json
 import urllib.request
@@ -87,8 +89,11 @@ class CharacterCreator(MDApp):
     super().__init__(**kwargs)
   def build(self):
     envWidget = BoxLayout(orientation = "vertical")
+    envWidget.size_hint = 1,1
+    #envWidget.width=4000
     with envWidget.canvas:
       Color(1.,0,0)
+      Rectangle(size = envWidget.size, size_hint = (1,1))
     mainWindTB = ToolBar(toolBarButtons = {
   "File":{
     "New":{"TestButton":Button()},
@@ -103,7 +108,10 @@ class CharacterCreator(MDApp):
     basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), Page()]
     Pages = GridLayout(cols = 1, spacing = 10, size_hint = (1, None))
     Pages.bind(minimum_height = Pages.setter( "height"))
-    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"])
+    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"], bar_width = 10, size_hint_x = 1)
+    Pages.pos_hint = {"x":envWidget.center_x}
+    print(Pages.center_x)
+    print(envWidget.center_x)
     for page in basePages:
       Pages.add_widget(page)
     PagesScroll.add_widget(Pages)
