@@ -83,18 +83,17 @@ def save(data = {}):
   pass
 
 toolBarHeight = 30
+pageSize = (2550,3300)
+pageSize = (1000,500)
 
 class CharacterCreator(MDApp):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
   def build(self):
-    envWidget = BoxLayout(orientation = "vertical")
+    envWidget = BoxLayout(orientation = "vertical")#adds the toolbar
     envWidget.size_hint = 1,1
-    #envWidget.width=4000
-    with envWidget.canvas:
-      Color(1.,0,0)
-      Rectangle(size = envWidget.size, size_hint = (1,1))
     mainWindTB = ToolBar(toolBarButtons = {
+  
   "File":{
     "New":{"TestButton":Button()},
     "Open":{"TestButton":Button()},
@@ -103,26 +102,30 @@ class CharacterCreator(MDApp):
   },"Edit":{
     "TestButton":Button()
   },"TestButton":Button()
-})
+
+})#Edit this to change button behaviors.
     envWidget.add_widget(mainWindTB)
-    basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), Page()]
-    Pages = GridLayout(cols = 1, spacing = 10, size_hint = (1, None))
-    Pages.bind(minimum_height = Pages.setter( "height"))
-    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"], bar_width = 10, size_hint_x = 1)
-    Pages.pos_hint = {"x":envWidget.center_x}
-    print(Pages.center_x)
-    print(envWidget.center_x)
-    for page in basePages:
-      Pages.add_widget(page)
-    PagesScroll.add_widget(Pages)
+    
+    self.basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), Page()]
+    self.Pages = GridLayout(cols = 1, spacing = 50, size_hint = (1, None))
+    self.Pages.bind(minimum_height = self.Pages.setter( "height"))
+    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"], bar_width = 150, pos_hint = {"center_x":1}, scroll_wheel_distance = 50)
+    for page in self.basePages:
+      self.Pages.add_widget(page)
+    PagesScroll.add_widget(self.Pages)
     envWidget.add_widget(PagesScroll)
+    
     return envWidget
+  def rebuildPages(self):
+    self.Pages.clear_widgets()
+    for page in self.basePages():
+      self.Pages.add_widget(page)
 
 class Page(BoxLayout):
   def __init__(self, pageName = None, **kwargs):
     super().__init__(**kwargs)
     self.size_hint = None, None
-    self.size = 1000,282
+    self.size = pageSize
     self.add_widget(Button(size_hint = (1,1)))
     self.pageName = pageName
   
@@ -133,7 +136,7 @@ class ToolBar(BoxLayout):
     self.orientation = "horizontal"
     self.height = toolBarHeight
     self.size_hint_y = None
-    self.pos_hint = {"top":1}
+    self.pos_hint = {"y":1,"x":0}
     super().__init__(**kwargs)
     
     for btn in toolBarButtons.keys():
