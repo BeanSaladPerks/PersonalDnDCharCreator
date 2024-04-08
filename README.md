@@ -1,1 +1,1 @@
-I created this program as a school project. It will only contain whatever data is available in the database I copied from, so you will need to add the rest yourself if you want any more than it currently has.
+I created this program as a school project. It doesn't contain any data. so unless you want to do some editing of the code, you will need to also download the 5ebits database. It was coded with 3.3.3 in mind, but probably could also work with a later version.
