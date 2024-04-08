@@ -90,7 +90,7 @@ class CharacterCreator(MDApp):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
   def build(self):
-    envWidget = BoxLayout(orientation = "vertical")#adds the toolbar
+    envWidget = BoxLayout(orientation = "vertical")
     envWidget.size_hint = 1,1
     mainWindTB = ToolBar(toolBarButtons = {
   
@@ -106,17 +106,17 @@ class CharacterCreator(MDApp):
 })#Edit this to change button behaviors.
     envWidget.add_widget(mainWindTB)
     
-    self.basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), Page()]
+    self.basePages = [Page(pageName = "Name + Stats"), Page(pageName = "Test"), SpellSheet()]
     self.Pages = GridLayout(cols = 1, spacing = 50, size_hint = (1, None))
     self.Pages.bind(minimum_height = self.Pages.setter( "height"))
-    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"], bar_width = 150, pos_hint = {"center_x":1}, scroll_wheel_distance = 50)
+    PagesScroll = ScrollView(bar_pos_y = "right", scroll_type = ["bars"], bar_width = 15, pos_hint = {"center_x":.5}, scroll_wheel_distance = 50)
     for page in self.basePages:
       self.Pages.add_widget(page)
     PagesScroll.add_widget(self.Pages)
     envWidget.add_widget(PagesScroll)
     
     return envWidget
-  def rebuildPages(self):
+  #def rebuildPages(self):
     self.Pages.clear_widgets()
     for page in self.basePages():
       self.Pages.add_widget(page)
@@ -128,6 +128,14 @@ class Page(BoxLayout):
     self.size = pageSize
     self.add_widget(Button(size_hint = (1,1)))
     self.pageName = pageName
+
+class SpellSheet(Page):
+  def __init__(self, pageName = None, **kwargs):
+    super().__init__(pageName, **kwargs)
+    with self.canvas:
+      Color(1.,1.,1.)
+      Line(RoundedRectangle=(self.x,self.y,self.width,self.height,20),Color=(.5,.7,0))
+    self.clear_widgets()
   
 
 class ToolBar(BoxLayout):
