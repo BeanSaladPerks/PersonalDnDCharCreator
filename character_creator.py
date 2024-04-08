@@ -79,6 +79,9 @@ class CharacterCreator(MDApp):
   def build(self):
     envWidget = BoxLayout(orientation = "vertical")
     envWidget.size_hint = 1,1
+    with envWidget.canvas:
+      Color(.7,.7,.7)
+      Rectangle(pos=(0,0),size=(9999,9999))
     mainWindTB = ToolBar(toolBarButtons = {
   
   "File":{
@@ -120,8 +123,8 @@ class SpellSheet(Page):
   def __init__(self, pageName = None, **kwargs):
     super().__init__(pageName, **kwargs)
     with self.canvas:
-      Color(1.,1.,1.)
-      Line(RoundedRectangle=(self.x,self.y,self.width,self.height,20),Color=(.5,.7,0))
+      Color(1.,1.,0)
+      Line(rounded_rectangle=(0,0,self.width,self.height,20),width=50)
     self.clear_widgets()
   
 
