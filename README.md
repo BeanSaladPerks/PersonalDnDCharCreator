@@ -1,0 +1,1 @@
+I created this program as a school project. It will only contain whatever data is available in the database I copied from, so you will need to add the rest yourself if you want any more than it currently has.
